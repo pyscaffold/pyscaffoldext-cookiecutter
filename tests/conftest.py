@@ -7,11 +7,11 @@
     Read more about conftest.py under:
     https://pytest.org/latest/plugins.html
 """
-from __future__ import print_function, absolute_import, division
-
+import builtins
 import os
-import stat
 import shlex
+import stat
+from contextlib import contextmanager
 from shutil import rmtree
 
 import pytest
@@ -57,3 +57,54 @@ def venv_run(venv):
         return venv.run(args, **kwargs).strip()
 
     return _run
+
+
+@contextmanager
+def disable_import(prefix):
+    """Avoid packages being imported
+
+    Args:
+        prefix: string at the beginning of the package name
+    """
+    realimport = builtins.__import__
+
+    def my_import(name, *args, **kwargs):
+        if name.startswith(prefix):
+            raise ImportError
+        return realimport(name, *args, **kwargs)
+
+    try:
+        builtins.__import__ = my_import
+        yield
+    finally:
+        builtins.__import__ = realimport
+
+
+@pytest.fixture
+def nocookiecutter_mock():
+    with disable_import('cookiecutter'):
+        yield
+
+
+@pytest.fixture
+def cookiecutter_config(tmpfolder):
+    # Define custom "cache" directories for cookiecutter inside a temporary
+    # directory per test.
+    # This way, if the tests are running in parallel, each test has its own
+    # "cache" and stores/removes cookiecutter templates in an isolated way
+    # avoiding inconsistencies/race conditions.
+    config = (
+        'cookiecutters_dir: "{dir}/custom-cookiecutters"\n'
+        'replay_dir: "{dir}/cookiecutters-replay"'
+    ).format(dir=str(tmpfolder))
+
+    tmpfolder.mkdir('custom-cookiecutters')
+    tmpfolder.mkdir('cookiecutters-replay')
+
+    config_file = tmpfolder.join('cookiecutter.yaml')
+    config_file.write(config)
+    os.environ['COOKIECUTTER_CONFIG'] = str(config_file)
+
+    yield
+
+    del os.environ['COOKIECUTTER_CONFIG']

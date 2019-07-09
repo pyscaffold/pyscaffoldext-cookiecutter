@@ -9,8 +9,13 @@ import pytest
 
 from pyscaffold.api import create_project
 from pyscaffold.cli import parse_args, process_opts, run
-from pyscaffold.extensions import cookiecutter
 from pyscaffold.templates import setup_py
+
+from pyscaffoldext.cookiecutter.extension import (
+    Cookiecutter,
+    MissingTemplate,
+    NotInstalled
+)
 
 pytestmark = [pytest.mark.usefixtures('cookiecutter_config')]
 
@@ -25,7 +30,7 @@ def test_create_project_with_cookiecutter(tmpfolder):
     # Given options with the cookiecutter extension,
     opts = dict(project=PROJ_NAME,
                 cookiecutter=COOKIECUTTER_URL,
-                extensions=[cookiecutter.Cookiecutter('cookiecutter')])
+                extensions=[Cookiecutter('cookiecutter')])
 
     # when the project is created,
     create_project(opts)
@@ -60,11 +65,11 @@ def test_pretend_create_project_with_cookiecutter(tmpfolder, caplog):
 def test_create_project_with_cookiecutter_but_no_template(tmpfolder):
     # Given options with the cookiecutter extension, but no template
     opts = dict(project=PROJ_NAME,
-                extensions=[cookiecutter.Cookiecutter('cookiecutter')])
+                extensions=[Cookiecutter('cookiecutter')])
 
     # when the project is created,
     # then an exception should be raised.
-    with pytest.raises(cookiecutter.MissingTemplate):
+    with pytest.raises(MissingTemplate):
         create_project(opts)
 
 
@@ -85,11 +90,11 @@ def test_create_project_no_cookiecutter(tmpfolder, nocookiecutter_mock):
     # but without cookiecutter being installed,
     opts = dict(project=PROJ_NAME,
                 cookiecutter=COOKIECUTTER_URL,
-                extensions=[cookiecutter.Cookiecutter('cookiecutter')])
+                extensions=[Cookiecutter('cookiecutter')])
 
     # when the project is created,
     # then an exception should be raised.
-    with pytest.raises(cookiecutter.NotInstalled):
+    with pytest.raises(NotInstalled):
         create_project(opts)
 
 
@@ -102,7 +107,7 @@ def test_create_project_cookiecutter_and_update(tmpfolder, capsys):
     opts = dict(project=PROJ_NAME,
                 update=True,
                 cookiecutter=COOKIECUTTER_URL,
-                extensions=[cookiecutter.Cookiecutter('cookiecutter')])
+                extensions=[Cookiecutter('cookiecutter')])
     create_project(opts)
 
     # then a warning should be displayed
