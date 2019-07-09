@@ -8,7 +8,7 @@ from .helpers import run, run_common_tasks
 
 pytestmark = [pytest.mark.slow, pytest.mark.system]
 
-COOKIECUTTER = 'https://github.com/FlorianWilhelm/cookiecutter-pypackage.git'
+COOKIECUTTER = 'https://github.com/pyscaffold/cookiecutter-pypackage.git'
 
 
 def is_venv():
