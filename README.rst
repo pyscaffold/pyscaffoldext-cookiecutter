@@ -40,7 +40,7 @@ Or, if you prefer ``pipx``:
 
 .. code-block:: shell
 
-   $ pipx install pyscaffold  # if you havent installed pyscaffold yet
+   $ pipx install pyscaffold  # if you haven't installed pyscaffold yet
    $ pipx inject pyscaffold pyscaffoldext-cookiecutter
 
 Note that, after the installation, ``putup -h`` will show a new option
@@ -124,6 +124,12 @@ Accordingly, the template file structure should be similar to::
                 └── ...
 
 See `Cookiecutter`_ for more information about template creation.
+
+.. note::
+
+   PyScaffold uses Cookiecutter only for its ability to create files.
+   Pre/post hooks that perform any other kind of side effect are not
+   guaranteed to work.
 
 
 Note
