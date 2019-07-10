@@ -66,7 +66,7 @@ except Exception as e:
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.todo',
               'sphinx.ext.autosummary', 'sphinx.ext.viewcode', 'sphinx.ext.coverage',
               'sphinx.ext.doctest', 'sphinx.ext.ifconfig', 'sphinx.ext.mathjax',
-              'sphinx.ext.napoleon']
+              'sphinx.ext.napoleon', 'sphinxcontrib.spelling']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -130,20 +130,16 @@ pygments_style = 'sphinx'
 # If true, keep warnings as "system message" paragraphs in the built documents.
 # keep_warnings = False
 
+# -- Options for Spell Check ---------------------------------------------------
+spelling_lang = 'en_US'
+spelling_word_list_filename = os.path.join(os.path.dirname(__file__), '.spell')
+spelling_show_suggestions = True
 
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'alabaster'
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-html_theme_options = {
-    'sidebar_width': '300px',
-    'page_width': '1200px'
-}
+html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
@@ -269,4 +265,5 @@ intersphinx_mapping = {
     'sklearn': ('http://scikit-learn.org/stable', None),
     'pandas': ('http://pandas.pydata.org/pandas-docs/stable', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
+    'pyscaffold': ('https://pyscaffold.org/en/latest', None),
 }
