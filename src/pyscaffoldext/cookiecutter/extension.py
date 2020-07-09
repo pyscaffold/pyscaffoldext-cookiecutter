@@ -20,20 +20,56 @@ class Cookiecutter(Extension):
 
     mutually_exclusive = True
 
+    try:
+        # TODO: Remove this try/except block on PyScaffold >= 4.x
+        from pyscaffold.extensions import cookiecutter  # Check if builtin existis
+
+        del cookiecutter
+
+        # WORKAROUND:
+        #
+        # This avoids raising an error by using `add_argument` with an
+        # option/flag that was already used and at the same time provides
+        # a unequivocal way of accessing the newest implementation in the
+        # tests via the `--x-` prefix.
+        #
+        # For the time being this is useful to run against an existing
+        # version of PyScaffold that have an old implementation of this
+        # extension built into the core of the system.
+
+        @property
+        def xhelp(self):
+            return ("Newest version of `{}`, in development".format(self.flag),)
+
+        @property
+        def xflag(self):
+            return "--x-" + self.flag.strip("-")
+
+    except ImportError:
+        pass  # Never mind, we are in a recent version of PyScaffold
+
     def augment_cli(self, parser):
         """Add an option to parser that enables the Cookiecutter extension
 
         Args:
             parser (argparse.ArgumentParser): CLI parser object
         """
+        # TODO: Simplify the x stuff for PyScaffold >= 4.x
+        flag = getattr(self, "xflag", self.flag)
+        help = getattr(
+            self,
+            "xhelp",
+            "additionally apply a Cookiecutter template. "
+            "Note that not all templates are suitable for PyScaffold. "
+            "Please refer to the docs for more information.",
+        )
+
         parser.add_argument(
-            self.flag,
+            flag,
             dest=self.name,
             action=create_cookiecutter_parser(self),
             metavar="TEMPLATE",
-            help="additionally apply a Cookiecutter template. "
-            "Note that not all templates are suitable for PyScaffold. "
-            "Please refer to the docs for more information.",
+            help=help,
         )
 
     def activate(self, actions):

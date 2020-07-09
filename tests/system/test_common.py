@@ -4,11 +4,16 @@ from os.path import isdir
 
 import pytest
 
+from pyscaffoldext.cookiecutter.extension import Cookiecutter
+
 from .helpers import run, run_common_tasks
 
 pytestmark = [pytest.mark.slow, pytest.mark.system]
 
 COOKIECUTTER = "https://github.com/pyscaffold/cookiecutter-pypackage.git"
+
+# TODO: Remove workaround for PyScaffold <= 4.x, see comments on class
+FLAG = (lambda ext: getattr(ext, "xflag", ext.flag))(Cookiecutter("cookiecutter"))
 
 
 def is_venv():
@@ -37,7 +42,7 @@ def test_ensure_inside_test_venv():
 def test_namespace_cookiecutter(cwd):
     # Given pyscaffold is installed,
     # when we call putup with --namespace and --cookiecutter
-    run("putup myproj --namespace nested.ns --cookiecutter " + COOKIECUTTER)
+    run("putup myproj --namespace nested.ns {} {}".format(FLAG, COOKIECUTTER))
     # then a very complicated module hierarchy should exist
     assert isdir("myproj/src/nested/ns/myproj")
     # and all the common tasks should run properly
