@@ -3,6 +3,7 @@
 import logging
 import re
 import sys
+from configparser import ConfigParser
 from os.path import exists as path_exists
 
 import pytest
@@ -45,9 +46,16 @@ def test_create_project_with_cookiecutter(tmpfolder):
     # then cookiecutter files should exist
     for path in COOKIECUTTER_FILES:
         assert path_exists(path)
+
     # and also overwritable pyscaffold files (with the exact contents)
-    existing_setup = tmpfolder.join(PROJ_NAME).join("setup.py").read()
-    assert existing_setup == setup_py(opts)
+    assert tmpfolder.join(PROJ_NAME).join("setup.py").read() == setup_py(opts)
+
+    # and the cookiecutter configuration should be stored in setup.cfg
+    existing_setup = tmpfolder.join(PROJ_NAME).join("setup.cfg").read()
+    cfg = ConfigParser()
+    cfg.read_string(existing_setup)
+    # TODO
+    # assert cfg.get("pyscaffold", "cookiecutter") == COOKIECUTTER_URL
 
 
 def test_pretend_create_project_with_cookiecutter(tmpfolder, caplog):
