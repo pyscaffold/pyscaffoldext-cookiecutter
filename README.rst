@@ -111,9 +111,16 @@ PyScaffold injects the following parameters::
 
     author
     email
-    project_name
-    package_name
-    project_short_description
+    full_name => same as author
+    project_name => the name of the folder where the project will be generated
+    repo_name => same as project_name
+    package_name => putup's --package (as in `import`)
+    namespace => putup's --namespace (if any)
+    installable_name => putup's --name (an installable name, like in PyPI/pip install)
+    project_short_description => putup's description
+    release_date => equivalent to the day you are running putup
+    year => equivalent to the year you are running putup
+    version => "unknown" (should be replaced later by setuptools_scm mechanism)
 
 Accordingly, the template file structure should be similar to::
 
@@ -131,11 +138,28 @@ See `Cookiecutter`_ for more information about template creation.
    Pre/post hooks that perform any other kind of side effect are not
    guaranteed to work.
 
+.. _pyscaffold-notes:
+
+Making Changes & Contributing
+=============================
+
+This project uses `pre-commit`_, please make sure to install it before making any
+changes::
+
+    $ pip install pre-commit
+    $ cd pyscaffoldext-cookiecutter
+    $ pre-commit install
+
+It is a good idea to update the hooks to the latest version::
+
+    pre-commit autoupdate
+
+Please also check PyScaffold's `contribution guidelines`_,
 
 Note
 ====
 
-This project has been set up using PyScaffold 3.2. For details and usage
+This project has been set up using PyScaffold 4.0a2. For details and usage
 information on PyScaffold see https://pyscaffold.org/.
 
 
@@ -144,3 +168,5 @@ information on PyScaffold see https://pyscaffold.org/.
 .. _setuptools_scm: https://pypi.python.org/pypi/setuptools_scm/
 .. _sphinx: http://www.sphinx-doc.org
 .. _extension: https://pyscaffold.org/en/latest/extensions.html
+.. _pre-commit: http://pre-commit.com/
+.. _contribution guidelines: https://pyscaffold.org/en/latest/contributing.html

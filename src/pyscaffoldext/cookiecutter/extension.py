@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Extension that integrates cookiecutter templates into PyScaffold.
 """
@@ -8,151 +7,53 @@ Extension that integrates cookiecutter templates into PyScaffold.
 # commit history.
 # Please refer to ``pyscaffold`` if that is needed.
 
-import argparse
+from typing import List
 
-from pyscaffold.api import Extension
-from pyscaffold.api.helpers import logger, register
+from pyscaffold import file_system as fs
+from pyscaffold.actions import Action, ActionParams, ScaffoldOpts, Structure
+from pyscaffold.extensions import Extension, store_with
+from pyscaffold.log import logger
 from pyscaffold.warnings import UpdateNotSupported
 
 
 class Cookiecutter(Extension):
-    """Additionally apply a Cookiecutter template"""
-
-    mutually_exclusive = True
-
-    try:
-        # TODO: Remove this try/except block on PyScaffold >= 4.x
-        from pyscaffold.extensions import cookiecutter  # Check if builtin existis
-
-        del cookiecutter
-
-        # WORKAROUND:
-        #
-        # This avoids raising an error by using `add_argument` with an
-        # option/flag that was already used and at the same time provides
-        # a unequivocal way of accessing the newest implementation in the
-        # tests via the `--x-` prefix.
-        #
-        # For the time being this is useful to run against an existing
-        # version of PyScaffold that have an old implementation of this
-        # extension built into the core of the system.
-
-        @property
-        def xhelp(self):
-            return ("Newest version of `{}`, in development".format(self.flag),)
-
-        @property
-        def xflag(self):
-            return "--x-" + self.flag.strip("-")
-
-    except ImportError:
-        pass  # Never mind, we are in a recent version of PyScaffold
+    """Additionally apply a Cookiecutter template.
+    Note that not all templates are suitable for PyScaffold.
+    Please refer to the docs for more information.
+    """
 
     def augment_cli(self, parser):
         """Add an option to parser that enables the Cookiecutter extension
-
-        Args:
-            parser (argparse.ArgumentParser): CLI parser object
+        See :obj:`pyscaffold.extension.Extension.augment_cli`.
         """
-        # TODO: Simplify the x stuff for PyScaffold >= 4.x
-        flag = getattr(self, "xflag", self.flag)
-        help = getattr(
-            self,
-            "xhelp",
-            "additionally apply a Cookiecutter template. "
-            "Note that not all templates are suitable for PyScaffold. "
-            "Please refer to the docs for more information.",
-        )
 
         parser.add_argument(
-            flag,
+            self.flag,
             dest=self.name,
-            action=create_cookiecutter_parser(self),
+            action=store_with(self),
             metavar="TEMPLATE",
-            help=help,
+            help=self.help_text,
         )
 
-    def activate(self, actions):
+    def activate(self, actions: List[Action]) -> List[Action]:
         """Register before_create hooks to generate project using Cookiecutter
-
-        Args:
-            actions (list): list of actions to perform
-
-        Returns:
-            list: updated list of actions
-        """
-        # `get_default_options` uses passed options to compute derived ones,
-        # so it is better to prepend actions that modify options.
-        actions = register(
-            actions, enforce_cookiecutter_options, before="get_default_options"
-        )
-
-        # `apply_update_rules` uses CWD information,
-        # so it is better to prepend actions that modify it.
-        actions = register(actions, create_cookiecutter, before="apply_update_rules")
-
-        return actions
+        Activate extension. See :obj:`pyscaffold.extension.Extension.activate`."""
+        actions = self.register(actions, enforce_options, before="get_default_options")
+        return self.register(actions, create_cookiecutter)
 
 
-def create_cookiecutter_parser(obj_ref):
-    """Create a Cookiecutter parser.
-
-    Args:
-        obj_ref (Extension): object reference to the actual extension
-
-    Returns:
-        NamespaceParser: parser for namespace cli argument
-    """
-
-    class CookiecutterParser(argparse.Action):
-        """Consumes the values provided, but also append the extension function
-        to the extensions list.
-        """
-
-        def __call__(self, parser, namespace, values, option_string=None):
-            # First ensure the extension function is stored inside the
-            # 'extensions' attribute:
-            extensions = getattr(namespace, "extensions", [])
-            extensions.append(obj_ref)
-            namespace.extensions = extensions
-
-            # Now the extra parameters can be stored
-            setattr(namespace, self.dest, values)
-
-            # save the cookiecutter cli argument for later
-            obj_ref.args = values
-
-    return CookiecutterParser
-
-
-def enforce_cookiecutter_options(struct, opts):
+def enforce_options(struct: Structure, opts: ScaffoldOpts) -> ActionParams:
     """Make sure options reflect the cookiecutter usage.
-
-    Args:
-        struct (dict): project representation as (possibly) nested
-            :obj:`dict`.
-        opts (dict): given options, see :obj:`create_project` for
-            an extensive list.
-
-    Returns:
-        struct, opts: updated project representation and options
+    See :obj:`pyscaffold.actions.Action`.
     """
     opts["force"] = True
 
     return struct, opts
 
 
-def create_cookiecutter(struct, opts):
+def create_cookiecutter(struct: Structure, opts: ScaffoldOpts) -> ActionParams:
     """Create a cookie cutter template
-
-    Args:
-        struct (dict): project representation as (possibly) nested
-            :obj:`dict`.
-        opts (dict): given options, see :obj:`create_project` for
-            an extensive list.
-
-    Returns:
-        struct, opts: updated project representation and options
+    See :obj:`pyscaffold.actions.Action`.
     """
     if opts.get("update"):
         logger.warning(UpdateNotSupported(extension="cookiecutter"))
@@ -163,13 +64,18 @@ def create_cookiecutter(struct, opts):
     except Exception as e:
         raise NotInstalled from e
 
+    project_path = opts["project_path"].resolve()
+    parent = project_path.parent
+    project_name = project_path.name
     extra_context = dict(
         full_name=opts["author"],
         author=opts["author"],
         email=opts["email"],
-        project_name=opts["project"],
+        installable_name=opts["name"],
         package_name=opts["package"],
-        repo_name=opts["package"],
+        namespace=opts.get("namespace"),
+        repo_name=project_name,
+        project_name=project_name,
         project_short_description=opts["description"],
         release_date=opts["release_date"],
         version="unknown",  # will be replaced later
@@ -181,7 +87,10 @@ def create_cookiecutter(struct, opts):
 
     logger.report("run", "cookiecutter " + opts["cookiecutter"])
     if not opts.get("pretend"):
-        cookiecutter(opts["cookiecutter"], no_input=True, extra_context=extra_context)
+        with fs.chdir(parent):
+            cookiecutter(
+                opts["cookiecutter"], no_input=True, extra_context=extra_context
+            )
 
     return struct, opts
 
