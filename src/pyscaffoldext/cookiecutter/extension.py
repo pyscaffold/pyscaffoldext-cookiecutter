@@ -1,5 +1,11 @@
-"""
-Extension that integrates cookiecutter templates into PyScaffold.
+"""Extension that integrates cookiecutter templates into PyScaffold.
+
+When used via PyScaffold's Python API (instead of CLI), a ``cookiecutter_params``
+keyword argument can be optionally added to :obj:`pyscaffold.api.create_project`,
+this argument should be a :obj:`dict` (or a similar object that can be converted to dict
+via the :obj:`dict` constructor), and is equivalent to ``extra_context`` in
+:obj:`cookicookiecutter.main.cookiecutter` (PyScaffold will always add some default
+values, even when no ``cookiecutter_params`` are given).
 """
 
 # This file was transfered from the main PyScaffold repository using
@@ -7,7 +13,7 @@ Extension that integrates cookiecutter templates into PyScaffold.
 # commit history.
 # Please refer to ``pyscaffold`` if that is needed.
 
-from typing import List
+from typing import Any, Dict, List
 
 from pyscaffold import file_system as fs
 from pyscaffold.actions import Action, ActionParams, ScaffoldOpts, Structure
@@ -26,13 +32,23 @@ class Cookiecutter(Extension):
         """Add an option to parser that enables the Cookiecutter extension
         See :obj:`pyscaffold.extension.Extension.augment_cli`.
         """
-
         parser.add_argument(
             self.flag,
             dest=self.name,
             action=store_with(self),
             metavar="TEMPLATE",
             help=self.help_text,
+        )
+        parser.add_argument(
+            "--cookiecutter-params",
+            nargs="+",
+            required=False,
+            type=lambda kv: kv.split("=", 1),
+            help="extra parameters to be passed to cookiecutter in the form of "
+            "a space separated list of 'NAME=VALUE' (check the `cookiecutter.json` "
+            "file of the template you are using to see the available parameters). "
+            "Please notice PyScaffold already add some default parameters, check the "
+            "docs for more information.",
         )
 
     def activate(self, actions: List[Action]) -> List[Action]:
@@ -47,8 +63,27 @@ def enforce_options(struct: Structure, opts: ScaffoldOpts) -> ActionParams:
     See :obj:`pyscaffold.actions.Action`.
     """
     opts["force"] = True
-
     return struct, opts
+
+
+def parameters(opts: ScaffoldOpts) -> Dict[str, Any]:
+    """Parameters to be passed to cookiecutter as ``extra_context``"""
+    project_name = opts["project_path"].resolve().name
+    return {
+        "full_name": opts["author"],
+        "author": opts["author"],
+        "email": opts["email"],
+        "installable_name": opts["name"],
+        "package_name": opts["package"],
+        "namespace": opts.get("namespace"),
+        "repo_name": project_name,
+        "project_name": project_name,
+        "project_short_description": opts["description"],
+        "release_date": opts["release_date"],
+        "version": "unknown",  # will be replaced later
+        "year": opts["year"],
+        **dict(opts.get("cookiecutter_params") or {}),
+    }
 
 
 def create_cookiecutter(struct: Structure, opts: ScaffoldOpts) -> ActionParams:
@@ -64,33 +99,15 @@ def create_cookiecutter(struct: Structure, opts: ScaffoldOpts) -> ActionParams:
     except Exception as e:
         raise NotInstalled from e
 
-    project_path = opts["project_path"].resolve()
-    parent = project_path.parent
-    project_name = project_path.name
-    extra_context = dict(
-        full_name=opts["author"],
-        author=opts["author"],
-        email=opts["email"],
-        installable_name=opts["name"],
-        package_name=opts["package"],
-        namespace=opts.get("namespace"),
-        repo_name=project_name,
-        project_name=project_name,
-        project_short_description=opts["description"],
-        release_date=opts["release_date"],
-        version="unknown",  # will be replaced later
-        year=opts["year"],
-    )
-
-    if "cookiecutter" not in opts:
+    template = opts.get("cookiecutter")
+    if not template:
         raise MissingTemplate
 
     logger.report("run", "cookiecutter " + opts["cookiecutter"])
     if not opts.get("pretend"):
-        with fs.chdir(parent):
-            cookiecutter(
-                opts["cookiecutter"], no_input=True, extra_context=extra_context
-            )
+
+        with fs.chdir(opts["project_path"].resolve().parent):
+            cookiecutter(template, no_input=True, extra_context=parameters(opts))
 
     return struct, opts
 

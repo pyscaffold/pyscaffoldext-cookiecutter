@@ -284,5 +284,6 @@ intersphinx_mapping = {
     "sklearn": ("https://scikit-learn.org/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "cookiecutter": ("https://cookiecutter.readthedocs.io/en/latest", None),
     "pyscaffold": ("https://pyscaffold.org/en/stable", None),
 }

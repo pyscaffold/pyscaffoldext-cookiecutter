@@ -58,6 +58,23 @@ For example:
 Please refer to `Cookiecutter`_ documentation for more details on possible URLs
 and abbreviations.
 
+An additional option ``--cookiecutter-params`` is also added, so you can have
+more control over the values `Cookiecutter`_ uses when rendering the templates
+(PyScaffold will not run Cookiecutter's interactive prompt).
+This option takes the form of a space separated list of ``NAME=VALUE``
+arguments as showed in the example bellow:
+
+.. code-block:: bash
+
+    $ putup mypkg \
+      --cookiecutter gh:pyscaffold/cookiecutter-pypackage \
+      --cookiecutter-params command_line_interface=Argparse use_pytest=y
+
+Check the ``cookiecutter.json`` file in the repository (or directory) of the template you are
+using to see the available parameters.
+Please notice PyScaffold already add some default parameters, as indicated in
+the section :ref:`Suitable Templates <suitable-templates>` bellow.
+
 
 Cookiecutter templates with PyScaffold
 ======================================
@@ -91,6 +108,8 @@ template and convert it to PyScaffold afterwards:
     improve PyScaffold by contributing an `extension`_.
 
 
+.. _suitable-templates:
+
 Suitable templates
 ------------------
 
@@ -120,7 +139,8 @@ PyScaffold injects the following parameters::
     project_short_description => putup's description
     release_date => equivalent to the day you are running putup
     year => equivalent to the year you are running putup
-    version => "unknown" (should be replaced later by setuptools_scm mechanism)
+
+Any extra parameter should be passed using the ``--cookiecutter-params`` option.
 
 Accordingly, the template file structure should be similar to::
 
@@ -137,6 +157,7 @@ See `Cookiecutter`_ for more information about template creation.
    PyScaffold uses Cookiecutter only for its ability to create files.
    Pre/post hooks that perform any other kind of side effect are not
    guaranteed to work.
+
 
 .. _pyscaffold-notes:
 

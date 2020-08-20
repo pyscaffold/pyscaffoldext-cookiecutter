@@ -19,7 +19,6 @@ from .helpers import disable_import
 
 pytestmark = [pytest.mark.usefixtures("cookiecutter_config")]
 
-
 PROJ_NAME = "proj"
 COOKIECUTTER_URL = "https://github.com/pyscaffold/cookiecutter-pypackage.git"
 COOKIECUTTER_FILES = ["proj/Makefile", "proj/.github/ISSUE_TEMPLATE.md"]
