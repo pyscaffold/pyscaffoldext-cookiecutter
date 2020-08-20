@@ -28,6 +28,8 @@ class Cookiecutter(Extension):
     Please refer to the docs for more information.
     """
 
+    persist = False
+
     def augment_cli(self, parser):
         """Add an option to parser that enables the Cookiecutter extension
         See :obj:`pyscaffold.extension.Extension.augment_cli`.

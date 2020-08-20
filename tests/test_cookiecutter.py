@@ -50,11 +50,12 @@ def test_create_project_with_cookiecutter(tmpfolder):
     setup_py = (tmpfolder / PROJ_NAME / "setup.py").read_text()
     assert get_template("setup_py").safe_substitute(opts) == setup_py
 
-    # and the cookiecutter configuration should be stored in setup.cfg
+    # and the cookiecutter configuration should NOT be stored in setup.cfg
+    # (persist = False, since we do not support updates)
     existing_setup = (tmpfolder / PROJ_NAME / "setup.cfg").read_text()
     cfg = ConfigParser()
     cfg.read_string(existing_setup)
-    assert cfg.get("pyscaffold", "cookiecutter") == COOKIECUTTER_URL
+    assert "cookiecutter" not in cfg["pyscaffold"]
 
 
 def test_pretend_create_project_with_cookiecutter(tmpfolder, isolated_log):
