@@ -73,7 +73,7 @@ arguments as showed in the example bellow:
 Check the ``cookiecutter.json`` file in the repository (or directory) of the template you are
 using to see the available parameters.
 Please notice PyScaffold already add some default parameters, as indicated in
-the section :ref:`Suitable Templates <suitable-templates>` bellow.
+the section **Suitable Templates** bellow.
 
 
 Cookiecutter templates with PyScaffold
