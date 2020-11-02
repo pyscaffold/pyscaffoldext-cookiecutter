@@ -19,7 +19,12 @@ from pyscaffold import file_system as fs
 from pyscaffold.actions import Action, ActionParams, ScaffoldOpts, Structure
 from pyscaffold.extensions import Extension, store_with
 from pyscaffold.log import logger
-from pyscaffold.warnings import UpdateNotSupported
+
+UPDATE_WARNING = (
+    "Updating code generated using external tools is not "
+    "supported. The extension `cookiecutter` will be ignored, only "
+    "changes in PyScaffold core features will take place."
+)
 
 
 class Cookiecutter(Extension):
@@ -93,7 +98,7 @@ def create_cookiecutter(struct: Structure, opts: ScaffoldOpts) -> ActionParams:
     See :obj:`pyscaffold.actions.Action`.
     """
     if opts.get("update"):
-        logger.warning(UpdateNotSupported(extension="cookiecutter"))
+        logger.warning(UPDATE_WARNING)
         return struct, opts
 
     try:
