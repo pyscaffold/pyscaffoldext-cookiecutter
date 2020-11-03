@@ -120,7 +120,7 @@ def test_create_project_no_cookiecutter(tmpfolder):
         create_project(opts)
 
 
-def test_create_project_cookiecutter_and_update(tmpfolder, capsys):
+def test_create_project_cookiecutter_and_update(tmpfolder, capfd):
     # Given a project exists
     create_project(project_path=PROJ_NAME, config_files=NO_CONFIG)
 
@@ -135,7 +135,7 @@ def test_create_project_cookiecutter_and_update(tmpfolder, capsys):
     create_project(opts)
 
     # then a warning should be displayed
-    out, err = capsys.readouterr()
+    out, err = capfd.readouterr()
     assert all(
         warn in out + err
         for warn in ("external tools", "not supported", "will be ignored")
@@ -156,7 +156,7 @@ def test_cli_with_cookiecutter(tmpfolder):
         assert Path(file).exists()
 
 
-def test_cli_with_cookiecutter_but_no_template(tmpfolder, capsys):
+def test_cli_with_cookiecutter_but_no_template(tmpfolder, capfd):
     # Given the command line with the cookiecutter option, but no template
     args = ["--no-config", PROJ_NAME, FLAG]
     # --no-config: avoid extra config from dev's machine interference
@@ -167,7 +167,7 @@ def test_cli_with_cookiecutter_but_no_template(tmpfolder, capsys):
         run(args)
 
     # make sure the exception is related to the missing argument
-    out, err = capsys.readouterr()
+    out, err = capfd.readouterr()
     assert "{}: expected one argument".format(FLAG) in out + err
 
 
@@ -184,7 +184,7 @@ def test_cli_without_cookiecutter(tmpfolder):
         assert not Path(file).exists()
 
 
-def test_cli_with_cookiecutter_and_update(tmpfolder, capsys):
+def test_cli_with_cookiecutter_and_update(tmpfolder, capfd):
     # Given a project exists
     create_project(project_path=PROJ_NAME, config_files=NO_CONFIG)
 
@@ -195,7 +195,7 @@ def test_cli_with_cookiecutter_and_update(tmpfolder, capsys):
     run(args)
 
     # then a warning should be displayed
-    out, err = capsys.readouterr()
+    out, err = capfd.readouterr()
     assert all(
         warn in out + err
         for warn in ("external tools", "not supported", "will be ignored")
