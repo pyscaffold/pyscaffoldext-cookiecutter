@@ -31,6 +31,7 @@ def test_create_project_with_cookiecutter(tmpfolder):
     # Given options with the cookiecutter extension,
     opts = dict(
         project_path=PROJ_NAME,
+        name=PROJ_NAME,
         package=PROJ_NAME,
         version=pyscaffold_version,
         cookiecutter=COOKIECUTTER_URL,
