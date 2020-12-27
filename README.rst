@@ -1,6 +1,6 @@
-.. image:: https://travis-ci.org/pyscaffold/pyscaffoldext-cookiecutter.svg?branch=master
-    :alt: Travis
-    :target: https://travis-ci.org/pyscaffold/pyscaffoldext-cookiecutter
+.. image:: https://api.cirrus-ci.com/github/pyscaffold/pyscaffoldext-cookiecutter.svg?branch=master
+    :alt: Built Status
+    :target: https://cirrus-ci.com/github/pyscaffold/pyscaffoldext-cookiecutter
 .. image:: https://readthedocs.org/projects/pyscaffoldext-cookiecutter/badge/?version=latest
     :alt: ReadTheDocs
     :target: https://pyscaffoldext-cookiecutter.readthedocs.io/
