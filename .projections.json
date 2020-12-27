@@ -1,0 +1,21 @@
+{
+  "*.py": {
+    "autoformat": true,
+    "textwidth": 88
+  },
+  "src/pyscaffoldext/cookiecutter/*/__init__.py" : {
+    "alternate": "tests/test_{basename}.py",
+    "type": "source"
+  },
+  "src/pyscaffoldext/cookiecutter/*.py" : {
+    "alternate": "tests/{dirname}/test_{basename}.py",
+    "type": "source"
+  },
+  "tests/**/test_*.py" : {
+    "alternate": [
+      "src/pyscaffoldext/cookiecutter/{dirname}/{basename}.py",
+      "src/pyscaffoldext/cookiecutter/{dirname}/{basename}/__init__.py"
+    ],
+    "type": "test"
+  }
+}
