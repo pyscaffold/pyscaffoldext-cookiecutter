@@ -27,53 +27,6 @@ def tmpfolder(tmp_path):
         rmpath(new_path)
 
 
-def _config_git(home):
-    config = """
-        [user]
-          name = Jane Doe
-          email = janedoe@email
-    """
-    (home / ".gitconfig").write_text(config)
-
-
-def _fake_expanduser(original_expand, real_home, fake_home):
-    def _expand(path):
-        value = original_expand(path)
-        if value.startswith(str(fake_home)):
-            return value
-
-        return value.replace(real_home, str(fake_home))
-
-    return _expand
-
-
-@pytest.fixture(autouse=True)
-def fake_home(tmp_path, monkeypatch):
-    """Isolate tests.
-    Avoid interference of an existing config dir in the developer's
-    machine
-    """
-    if os.getenv("REAL_HOME"):
-        # Avoid doing it twice
-        yield os.getenv("HOME")
-        return
-
-    real_home = str(os.path.expanduser("~"))
-    monkeypatch.setenv("REAL_HOME", real_home)
-
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    fake = Path(mkdtemp(prefix="home", dir=str(tmp_path)))
-    _config_git(fake)
-
-    expanduser = _fake_expanduser(os.path.expanduser, real_home, fake)
-    monkeypatch.setattr("os.path.expanduser", expanduser)
-    monkeypatch.setenv("HOME", str(fake))
-    monkeypatch.setenv("USERPROFILE", str(fake))  # Windows?
-
-    yield fake
-    rmpath(fake)
-
-
 @pytest.fixture(autouse=True)
 def cookiecutter_config(tmpfolder, monkeypatch):
     # Define custom "cache" directories for cookiecutter inside a temporary
