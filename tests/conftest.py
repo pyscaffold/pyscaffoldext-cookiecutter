@@ -36,7 +36,6 @@ def cookiecutter_config(tmpfolder, monkeypatch):
     # avoiding inconsistencies/race conditions.
     cookiecutters_dir = (tmpfolder / "custom-cookiecutters").resolve()
     cookiecutters_dir.mkdir(exist_ok=True, parents=True)
-    print(" cookiecutters_dir", cookiecutters_dir)
     replay_dir = (tmpfolder / "cookiecutters-replay").resolve()
     replay_dir.mkdir(exist_ok=True, parents=True)
 
