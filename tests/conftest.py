@@ -6,6 +6,7 @@ import logging
 import os
 from pathlib import Path
 from tempfile import mkdtemp
+from textwrap import dedent
 
 import pytest
 from pyscaffold.log import ReportFormatter
@@ -35,12 +36,13 @@ def _config_git(home):
     (home / ".gitconfig").write_text(config)
 
 
-def _fake_expanduser(original_expand, fake_home):
-    original_home = str(original_expand("~"))
-
+def _fake_expanduser(original_expand, real_home, fake_home):
     def _expand(path):
         value = original_expand(path)
-        return value.replace(original_home, str(fake_home))
+        if value.startswith(str(fake_home)):
+            return value
+
+        return value.replace(real_home, str(fake_home))
 
     return _expand
 
@@ -51,12 +53,20 @@ def fake_home(tmp_path, monkeypatch):
     Avoid interference of an existing config dir in the developer's
     machine
     """
-    fake = tmp_path / ("home" + uniqstr())
-    fake.mkdir()
+    if os.getenv("REAL_HOME"):
+        # Avoid doing it twice
+        yield os.getenv("HOME")
+        return
+
+    real_home = str(os.path.expanduser("~"))
+    monkeypatch.setenv("REAL_HOME", real_home)
+
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    fake = Path(mkdtemp(prefix="home", dir=str(tmp_path)))
     _config_git(fake)
 
-    original_expand = os.path.expanduser
-    monkeypatch.setattr("os.path.expanduser", _fake_expanduser(original_expand, fake))
+    expanduser = _fake_expanduser(os.path.expanduser, real_home, fake)
+    monkeypatch.setattr("os.path.expanduser", expanduser)
     monkeypatch.setenv("HOME", str(fake))
     monkeypatch.setenv("USERPROFILE", str(fake))  # Windows?
 
@@ -71,16 +81,21 @@ def cookiecutter_config(tmpfolder, monkeypatch):
     # This way, if the tests are running in parallel, each test has its own
     # "cache" and stores/removes cookiecutter templates in an isolated way
     # avoiding inconsistencies/race conditions.
-    config = (
-        f'cookiecutters_dir: "{tmpfolder}/custom-cookiecutters"\n'
-        f'replay_dir: "{tmpfolder}/cookiecutters-replay"'
-    )
+    cookiecutters_dir = (tmpfolder / "custom-cookiecutters").resolve()
+    cookiecutters_dir.mkdir(exist_ok=True, parents=True)
+    print(" cookiecutters_dir", cookiecutters_dir)
+    replay_dir = (tmpfolder / "cookiecutters-replay").resolve()
+    replay_dir.mkdir(exist_ok=True, parents=True)
 
-    (tmpfolder / "custom-cookiecutters").mkdir(exist_ok=True, parents=True)
     (tmpfolder / "cookiecutters-replay").mkdir(exist_ok=True, parents=True)
+    config = f"""\
+    ---
+    cookiecutters_dir: "{cookiecutters_dir}"
+    replay_dir: "{replay_dir}"
+    """
 
     config_file = tmpfolder / "cookiecutter.yaml"
-    config_file.write_text(config)
+    config_file.write_text(dedent(config))
     monkeypatch.setenv("COOKIECUTTER_CONFIG", str(config_file))
 
     yield config_file
