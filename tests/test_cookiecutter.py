@@ -152,6 +152,8 @@ def test_create_project_cookiecutter_and_update(tmpfolder, capfd):
 
 @pytest.mark.slow
 def test_cli_with_cookiecutter(tmpfolder):
+    assert not (tmpfolder / PROJ_NAME).exists()
+
     # Given the command line with the cookiecutter option,
     args = ["--no-config", PROJ_NAME, FLAG, COOKIECUTTER_URL]
     # --no-config: avoid extra config from dev's machine interference
