@@ -17,7 +17,6 @@ from .helpers import rmpath, uniqstr
 @pytest.fixture
 def tmpfolder(tmp_path):
     old_path = os.getcwd()
-    tmp_path.mkdir(parents=True, exist_ok=True)
     new_path = mkdtemp(dir=str(tmp_path))
     os.chdir(new_path)
     try:
