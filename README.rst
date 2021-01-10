@@ -10,6 +10,9 @@
 .. image:: https://img.shields.io/pypi/v/pyscaffoldext-cookiecutter.svg
     :alt: PyPI-Server
     :target: https://pypi.org/project/pyscaffoldext-cookiecutter/
+.. image:: https://pepy.tech/badge/pyscaffoldext-cookiecutter/month
+    :alt: Monthly Downloads
+    :target: https://pepy.tech/project/pyscaffoldext-cookiecutter
 
 
 ==========================
