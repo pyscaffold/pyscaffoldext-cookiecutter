@@ -37,14 +37,14 @@ This extension can be directly installed with ``pip``:
 
 .. code-block:: bash
 
-    $ pip install pyscaffoldext-cookiecutter
+    pip install pyscaffoldext-cookiecutter
 
 Or, if you prefer ``pipx``:
 
 .. code-block:: shell
 
-   $ pipx install pyscaffold  # if you haven't installed pyscaffold yet
-   $ pipx inject pyscaffold pyscaffoldext-cookiecutter
+    pipx install pyscaffold  # if you haven't installed pyscaffold yet
+    pipx inject pyscaffold pyscaffoldext-cookiecutter
 
 Note that, after the installation, ``putup -h`` will show a new option
 ``--cookiecutter TEMPLATE``.
@@ -55,8 +55,8 @@ For example:
 
 .. code-block:: shell
 
-   $ putup my-proj1 --cookiecutter ~/my-templates/default
-   $ putup my-proj2 --cookiecutter gh:something/from-github
+    putup my-proj1 --cookiecutter ~/my-templates/default
+    putup my-proj2 --cookiecutter gh:something/from-github
 
 Please refer to `Cookiecutter`_ documentation for more details on possible URLs
 and abbreviations.
@@ -69,7 +69,7 @@ arguments as showed in the example bellow:
 
 .. code-block:: bash
 
-    $ putup mypkg \
+    putup mypkg \
       --cookiecutter gh:pyscaffold/cookiecutter-pypackage \
       --cookiecutter-params command_line_interface=Argparse use_pytest=y
 
@@ -87,28 +87,26 @@ that uses a Cookiecutter template, but is enhanced by PyScaffold's features:
 
 .. code-block:: bash
 
-    $ putup mypkg --cookiecutter gh:pyscaffold/cookiecutter-pypackage
+    putup mypkg --cookiecutter gh:pyscaffold/cookiecutter-pypackage
 
 This is roughly equivalent to first create a project using the Cookiecutter
 template and convert it to PyScaffold afterwards:
 
 .. code-block:: bash
 
-    $ cookiecutter --no-input gh:pyscaffold/cookiecutter-pypackage project_name=mypkg
-    $ putup mypkg --force
+    cookiecutter --no-input gh:pyscaffold/cookiecutter-pypackage project_name=mypkg
+    putup mypkg --force
 
 .. note::
-
-    For complex Cookiecutter templates calling ``cookiecutter`` and ``putup``
-    separately may be a better option, since it is possible to answer
-    specific template questions or at least set values for Cookiecutter
-    variables.
+   For complex Cookiecutter templates calling ``cookiecutter`` and ``putup``
+   separately may be a better option, since it is possible to answer
+   specific template questions or at least set values for Cookiecutter
+   variables.
 
 .. warning::
-
-    Although using Cookiecutter templates is a viable solution to customize
-    a project that was set up with PyScaffold, the recommended way is to help
-    improve PyScaffold by contributing an `extension`_.
+   Although using Cookiecutter templates is a viable solution to customize
+   a project that was set up with PyScaffold, the recommended way is to help
+   improve PyScaffold by contributing an `extension`_.
 
 
 .. _suitable-templates:
@@ -156,7 +154,6 @@ Accordingly, the template file structure should be similar to::
 See `Cookiecutter`_ for more information about template creation.
 
 .. note::
-
    PyScaffold uses Cookiecutter only for its ability to create files.
    Pre/post hooks that perform any other kind of side effect are not
    guaranteed to work.
@@ -170,9 +167,9 @@ Making Changes & Contributing
 This project uses `pre-commit`_, please make sure to install it before making any
 changes::
 
-    $ pip install pre-commit
-    $ cd pyscaffoldext-cookiecutter
-    $ pre-commit install
+    pip install pre-commit
+    cd pyscaffoldext-cookiecutter
+    pre-commit install
 
 It is a good idea to update the hooks to the latest version::
 
