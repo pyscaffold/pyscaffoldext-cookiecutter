@@ -209,13 +209,13 @@ coverage_task:
 
 
 linkcheck_task:
-  name: linkcheck (Linux - 3.8)
+  name: linkcheck (Linux - 3.9)
   # only_if: $CIRRUS_BRANCH == 'master'
   allow_failures: true
   clone_script: *clone
-  container: {image: "python:3.8-buster"}
+  container: {image: "python:3.9-buster"}
   depends_on:
-    - test (Linux - 3.8)
+    - test (Linux - 3.9)
   pip_cache: *pip-cache
   install_script:
     - apt-get install -y git enchant
