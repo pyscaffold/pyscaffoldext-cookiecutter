@@ -218,7 +218,7 @@ linkcheck_task:
     - test (Linux - 3.9)
   pip_cache: *pip-cache
   install_script:
-    - apt-get install -y git enchant
+    - apt-get install -y git python3-enchant
   tox_install_script:
     - python -m pip install --upgrade pip setuptools tox
   prepare_script: *prepare
