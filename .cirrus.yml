@@ -213,7 +213,7 @@ linkcheck_task:
   # only_if: $CIRRUS_BRANCH == 'master'
   allow_failures: true
   clone_script: *clone
-  container: {image: "python:3.9-buster"}
+  container: {dockerfile: docs/Dockerfile}
   depends_on:
     - test (Linux - 3.9)
   pip_cache: *pip-cache
