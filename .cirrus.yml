@@ -49,16 +49,26 @@ env:
       - cat .pre-commit-config.yaml
 
 
+# Deep clone script for POSIX environments (required for setuptools-scm)
+.clone_script: &clone |
+  if [ -z "$CIRRUS_PR" ]; then
+    git clone --recursive --branch=$CIRRUS_BRANCH https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
+    git reset --hard $CIRRUS_CHANGE_IN_REPO
+  else
+    git clone --recursive https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
+    git fetch origin pull/$CIRRUS_PR/head:pull/$CIRRUS_PR
+    git reset --hard $CIRRUS_CHANGE_IN_REPO
+  fi
+
+
 # ---- Task definitions ----
 
 typecheck_task:
-  name: typecheck (Linux - 3.9)
-  container: {image: "python:3.9-buster"}  # most recent => better type support
+  name: typecheck (Linux - 3.10)
+  container: {image: "python:3.10-bullseye"}  # most recent => better type support
   pip_cache: *pip-cache
   mypy_cache:
     folder: .mypy_cache
-  install_script: &debian-install
-    - apt-get install -y git
   mypy_install_script:
     - python -m pip install --upgrade pip setuptools mypy -e .
   clean_workspace_script:
@@ -71,35 +81,23 @@ typecheck_task:
 
 linux_mac_task:
   # Use custom cloning since otherwise git tags are missing
-  clone_script: &clone |
-    if [ -z "$CIRRUS_PR" ]; then
-      git clone --recursive --branch=$CIRRUS_BRANCH https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
-      git reset --hard $CIRRUS_CHANGE_IN_REPO
-    else
-      git clone --recursive https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
-      git fetch origin pull/$CIRRUS_PR/head:pull/$CIRRUS_PR
-      git reset --hard $CIRRUS_CHANGE_IN_REPO
-    fi
+  clone_script: *clone
   matrix:
     - name: test (Linux - 3.6)
-      container: {image: "python:3.6-buster"}
-      install_script: *debian-install
+      container: {image: "python:3.6-bullseye"}
     - name: test (Linux - 3.7)
-      container: {image: "python:3.7-buster"}
-      install_script: *debian-install
+      container: {image: "python:3.7-bullseye"}
     - name: test (Linux - 3.8)
-      container: {image: "python:3.8-buster"}
-      install_script: *debian-install
+      container: {image: "python:3.8-bullseye"}
     - name: test (Linux - 3.9)
-      container: {image: "python:3.9-buster"}
-      install_script: *debian-install
+      container: {image: "python:3.9-bullseye"}
     - name: test (Linux - 3.10)
+      container: {image: "python:3.10-bullseye"}
+    - name: test (Linux - 3.11)
       allow_failures: true  # Python version is not stable
-      container: {image: "python:3.10-rc-buster"}
-      install_script: *debian-install
+      container: {image: "python:3.11-rc-bullseye"}
     - name: test (Linux - Anaconda)
       container: {image: "continuumio/anaconda3:2021.05"}
-      install_script: *debian-install
       env:
         USING_CONDA: true
       extra_install_script:
@@ -125,12 +123,12 @@ windows_task:
   tools_cache:
     folder: 'C:\tools'
     fingerprint_script:
-      - ps: echo "$env:CIRRUS_OS - nuget v5.10.0 - git 2.32.0.2"
+      - ps: echo "$env:CIRRUS_OS - nuget v6.0.0 - git 2.34.1"
     populate_script:
       - ps: (mkdir 'C:\tools')
       # ^  use parentheses to suppress errors
-      - ps: Invoke-WebRequest -OutFile 'C:\tools\nuget.exe' 'https://dist.nuget.org/win-x86-commandline/v5.10.0/nuget.exe'
-      - ps: nuget install GitForWindows -Version 2.32.0.2 -NonInteractive -OutputDirectory 'C:\tools'
+      - ps: Invoke-WebRequest -OutFile 'C:\tools\nuget.exe' 'https://dist.nuget.org/win-x86-commandline/v6.0.0/nuget.exe'
+      - ps: nuget install GitForWindows -Version 2.34.1 -NonInteractive -OutputDirectory C:\tools
   workaround_git_script:
     - git config --system core.longpaths true  # Fix for windows git checkout problems
   clone_script:
@@ -152,7 +150,7 @@ windows_task:
     PYTHON_HOME: 'C:\Python'
     PYTHON_APPDATA: '%APPDATA%\Python\Python38'
     # ^  update when python version changes
-    GIT_HOME: 'C:\tools\GitForWindows.2.32.0.2\tools'
+    GIT_HOME: 'C:\tools\GitForWindows.2.34.1\tools'
     # ^ update when git version changes
     HOME: '%USERPROFILE%'
     USERNAME: ContainerAdministrator
@@ -186,18 +184,18 @@ windows_task:
 
 
 coverage_task:
-  name: coverage (Linux - 3.6)
+  name: coverage (Linux - 3.8)
   clone_script: *clone
-  container: {image: "python:3.6-buster"}
+  container: {image: "python:3.8-bullseye"}
   env:
     COVERAGE: yes
   depends_on:
-    - test (Linux - 3.6)
     - test (Linux - 3.7)
     - test (Linux - 3.8)
+    - test (Linux - 3.9)
+    - test (Linux - 3.10)
     - test (Linux - Anaconda)
     - test (OS X)
-  install_script: *debian-install
   pip_install_script:
     pip install --user --upgrade coverage coveralls pre-commit
   precommit_script:

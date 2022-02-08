@@ -180,7 +180,7 @@ Please also check PyScaffold's `contribution guidelines`_,
 Note
 ====
 
-This project has been set up using PyScaffold 4.0a2. For details and usage
+This project has been set up using PyScaffold 4.1.4. For details and usage
 information on PyScaffold see https://pyscaffold.org/.
 
 
