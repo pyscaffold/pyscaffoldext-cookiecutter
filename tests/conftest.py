@@ -41,13 +41,13 @@ def cookiecutter_config(tmpfolder, monkeypatch):
     (tmpfolder / "cookiecutters-replay").mkdir(exist_ok=True, parents=True)
     config = f"""\
     ---
-    cookiecutters_dir: "{cookiecutters_dir}"
-    replay_dir: "{replay_dir}"
+    cookiecutters_dir: '{str(cookiecutters_dir).replace(os.sep, '/')}'
+    replay_dir: '{str(replay_dir).replace(os.sep, '/')}'
     """
 
     config_file = tmpfolder / "cookiecutter.yaml"
     config_file.write_text(dedent(config))
-    monkeypatch.setenv("COOKIECUTTER_CONFIG", str(config_file))
+    monkeypatch.setenv("COOKIECUTTER_CONFIG", str(config_file).replace(os.sep, "/"))
 
     yield config_file
 
