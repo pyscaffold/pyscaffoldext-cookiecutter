@@ -112,7 +112,6 @@ def create_cookiecutter(struct: Structure, opts: ScaffoldOpts) -> ActionParams:
 
     logger.report("run", "cookiecutter " + opts["cookiecutter"])
     if not opts.get("pretend"):
-
         with fs.chdir(opts["project_path"].resolve().parent):
             cookiecutter(template, no_input=True, extra_context=parameters(opts))
 
